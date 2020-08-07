@@ -8,6 +8,36 @@ interface Summary {
   ratingDescription: string;
 }
 
+interface Values {
+  target: number,
+  times: number[]
+}
+
+function parseValues(values: string[]): Values {
+  if (!values[3]) {
+    throw Error('Invalid arguments: Verify that "target" and "exerciseTimes" are defined');
+  }
+
+  const target = Number(values[2]);
+  const times = values.slice(3).map(num => Number(num));
+  const timesAreNums = times.every(t => !isNaN(t))
+
+  if (!isNaN(target) && timesAreNums) {
+    return {
+      target,
+      times
+    }
+  }
+
+  if (isNaN(target)) {
+    throw Error('Invalid argument: "target" must be a number');
+  }
+
+  if (!timesAreNums) {
+    throw Error('Invalid argument: "target" must be a number');
+  }
+}
+
 function calculateExercises(timeSpent: number[], targetTime: number): Summary {
   let summary = {
     numDays: timeSpent.length,
@@ -42,4 +72,9 @@ function calculateExercises(timeSpent: number[], targetTime: number): Summary {
   }
 }
 
-console.log(calculateExercises([3, 0, 2, 4.5, 0, 3, 1], 2));
+try {
+  const { target, times } = parseValues(process.argv);
+  console.log(calculateExercises(times, target));
+} catch(err) {
+  console.error(err.message);
+}

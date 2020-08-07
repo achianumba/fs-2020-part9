@@ -1,7 +1,32 @@
-/* 
-underweight (under 18.5 kg/m2), normal weight (18.5 to 25), overweight (25 to 30), and obese (over 30).
- */
+interface Args {
+    height: number,
+    weight: number
+}
 
+function parseArgs(args: string[]) {
+    const [, , h, w] = args;
+    const height = parseInt(h);
+    const weight = parseInt(w);
+
+    if (!isNaN(height) && !isNaN(weight)) {
+        return {
+            height,
+            weight
+        }
+    }
+
+    if (isNaN(height) && isNaN(weight)) {
+        throw TypeError(`Invalid arguments: "height" and "weight" must be numbers.`);
+    }
+
+    if (isNaN(height)) {
+        throw TypeError(`Invalid argument: "height" must be a number.`);
+    }
+
+    if (isNaN(weight)) {
+        throw TypeError(`Invalid argument: "weight" must be number.`);
+    }
+}
 
 function calculateBmi(height: number, weight: number): string {
     const heightInMetres: number = height / 100;
@@ -40,4 +65,9 @@ function calculateBmi(height: number, weight: number): string {
     }
 }
 
-console.log(calculateBmi(180, 74))
+try {
+    const { height, weight } = parseArgs(process.argv);
+    console.log(calculateBmi(height, weight));
+} catch(err) {
+    console.error(err.message);
+}
