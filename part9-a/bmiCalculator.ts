@@ -1,73 +1,93 @@
 interface Args {
-    height: number,
-    weight: number
+  height: string;
+  weight: string;
 }
 
-function parseArgs(args: string[]) {
-    const [, , h, w] = args;
-    const height = parseInt(h);
-    const weight = parseInt(w);
-
-    if (!isNaN(height) && !isNaN(weight)) {
-        return {
-            height,
-            weight
-        }
-    }
-
-    if (isNaN(height) && isNaN(weight)) {
-        throw TypeError(`Invalid arguments: "height" and "weight" must be numbers.`);
-    }
-
-    if (isNaN(height)) {
-        throw TypeError(`Invalid argument: "height" must be a number.`);
-    }
-
-    if (isNaN(weight)) {
-        throw TypeError(`Invalid argument: "weight" must be number.`);
-    }
+interface ParsedArgs {
+  height: number;
+  weight: number;
 }
 
-function calculateBmi(height: number, weight: number): string {
+interface WebBmi {
+  height: number;
+  weight: number;
+  bmi: string;
+}
+
+interface Err {
+  error: string;
+  message: string;
+}
+
+function parseArgs(args: Args): ParsedArgs {
+  const height = parseInt(args.height);
+  const weight = parseInt(args.weight);
+
+  if (isNaN(height) && isNaN(weight)) {
+    throw TypeError(`"height" and "weight" must be numbers.`);
+  }
+
+  if (isNaN(height)) {
+    throw TypeError(`"height" must be a number.`);
+  }
+
+  if (isNaN(weight)) {
+    throw TypeError(`"weight" must be number.`);
+  }
+
+  return {
+    height,
+    weight,
+  };
+}
+
+function calculateBmi(args: Args): WebBmi | Err {
+  try {
+    const { height, weight } = parseArgs(args);
     const heightInMetres: number = height / 100;
     const bmi: number = weight / (heightInMetres * heightInMetres);
-    
-    if (bmi <= 15) {
-        return 'Very severely underweight';
+
+    let reslut: WebBmi = { height, weight, bmi: "" };
+
+    if (bmi > 40) {
+      reslut.bmi = "Obese Class III (Very severely obese)";
     }
 
-    if (bmi <= 16) {
-        return 'Severely underweight';
+    if (bmi >= 35 && bmi < 40) {
+      reslut.bmi = "Obese Class II (Severely obese)";
     }
 
-    if (bmi <= 18.5) {
-        return 'Underweight'
+    if (bmi >= 30 && bmi < 35) {
+      reslut.bmi = "Obese Class I (Moderately obese)";
     }
 
-    if (bmi <= 25) {
-        return 'Normal (healthy weight)';
+    if (bmi >= 25 && bmi < 30) {
+      reslut.bmi = "Overweight";
     }
 
-    if (bmi <= 30) {
-        return 'Overweight';
+    if (bmi >= 18.5 && bmi < 25) {
+      reslut.bmi = "Normal (healthy weight)";
     }
 
-    if (bmi <= 35) {
-        return 'Obese Class I (Moderately obese)';
+    if (bmi >= 16 && bmi < 18.5) {
+      reslut.bmi = "Underweight";
     }
 
-    if (bmi <= 40) {
-        return 'Obese Class II (Severely obese)';
+    if (bmi >= 15 && bmi < 16) {
+      reslut.bmi = "Severely underweight";
     }
 
-    if (bmi >= 40) {
-        return 'Obese Class III (Very severely obese)';
+    if (bmi < 15) {
+      reslut.bmi = "Very severely underweight";
     }
+
+    return reslut;
+  } catch (err) {
+    return {
+      error: "malformed parameters",
+      message: err.message,
+    };
+  }
 }
 
-try {
-    const { height, weight } = parseArgs(process.argv);
-    console.log(calculateBmi(height, weight));
-} catch(err) {
-    console.error(err.message);
-}
+export default calculateBmi;
