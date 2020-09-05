@@ -33,7 +33,7 @@ function validateInput(values: Values): Values {
   return values;
 }
 
-function calculateExercises(args: Values): Summary | Err {
+function calculateExercises(args: any): Summary | Err {
   try {
     const { target, daily_exercises } = validateInput(args);
     let summary = {

@@ -1,5 +1,6 @@
 import express from 'express';
 import calculateBmi from './bmiCalculator';
+import calculateExercises from './exerciseCalculator';
 const app = express();
 
 app.get('/hello', (_req, res) => {
@@ -18,6 +19,19 @@ app.get('/bmi', (req, res) => {
     }
 
     res.status(400).json(payload);
+});
+
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
+app.post('/exercises', (req, res) => {
+    const payload = calculateExercises(req.body);
+
+    if ("error" in payload) {
+        res.status(400).json(payload);
+    }
+    
+    res.json(payload);
 });
 
 app.listen(process.env.PORT || 3001, () => {
