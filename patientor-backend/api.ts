@@ -1,6 +1,6 @@
 import express from 'express';
 import { getDiagnoses } from './services/diagnoses';
-import { getPatients } from './services/patients';
+import { getPatients, addPatient } from './services/patients';
 
 const api = express.Router();
 
@@ -14,6 +14,14 @@ api.get('/diagnoses', (_req, res) => {
 
 api.get('/patients', (_req, res) => {
     res.json(getPatients());
-})
+});
+
+api.post('/patients', (req, res) => {
+    try {
+        res.json(addPatient(req.body))
+    } catch(err) {
+        res.status(400).json({ error: err.message });
+    }
+});
 
 export default api;
