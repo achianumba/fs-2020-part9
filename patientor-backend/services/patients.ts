@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { SensitivePatientData, NewPatient } from '../types';
 import { patients } from '../data/patients';
 import { Patient } from '../interfaces';
@@ -46,3 +47,9 @@ export const addPatient = ({ name, dateOfBirth, ssn, gender, occupation}: NewPat
 //         gender: 'Female',
 //         occupation: 'Forensic Pathologist'
 //       }));
+=======
+import { SensitivePatientData } from '../types';
+import { patients } from '../data/patients';
+
+export const getPatients = (): SensitivePatientData[] => patients;
+>>>>>>> 0b80d9a97ad06fa173a04db9ff9b754f9b4420f8
