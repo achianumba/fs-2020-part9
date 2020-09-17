@@ -1,12 +1,9 @@
 import React from 'react';
-
-export interface Course {
-    name: string
-    exerciseCount: number
-}
+import Part from './Part';
+import { CoursePart } from '../index';
 
 const Content: React.FC<{ courseParts: any }> = ({ courseParts }) => {
-    return courseParts.map((part: Course) => (<p key={ part.name }>{ part.name } { part.exerciseCount }</p>))
+    return courseParts.map((part: CoursePart) => (<Part key={ part.name } part={ part } />))
 }
 
 export default Content;
