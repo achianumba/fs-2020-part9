@@ -1,10 +1,6 @@
 import { Patient } from '../interfaces';
 
-<<<<<<< HEAD
 export let patients: Patient[] = [
-=======
-export const patients: Patient[] = [
->>>>>>> 0b80d9a97ad06fa173a04db9ff9b754f9b4420f8
     {
         "id": "d2773336-f723-11e9-8f0b-362b9e155667",
         "name": "John McClane",
