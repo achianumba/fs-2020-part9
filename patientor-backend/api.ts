@@ -1,6 +1,6 @@
 import express from 'express';
 import { getDiagnoses } from './services/diagnoses';
-import { getPatients, addPatient } from './services/patients';
+import { getPatients, addPatient, getPatient } from './services/patients';
 
 const api = express.Router();
 
@@ -21,6 +21,14 @@ api.post('/patients', (req, res) => {
         res.json(addPatient(req.body))
     } catch(err) {
         res.status(400).json({ error: err.message });
+    }
+});
+
+api.get('/patients/:id', (req, res) => {
+    try {
+        res.json(getPatient(req.params.id));
+    } catch(err) {
+        res.status(400).json(err.message);
     }
 });
 
