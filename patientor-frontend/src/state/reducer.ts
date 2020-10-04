@@ -1,6 +1,10 @@
 import { State } from "./state";
 import { Patient } from "../types";
 
+const SET_PATIENT_LIST = "SET_PATIENT_LIST";
+const ADD_PATIENT = "ADD_PATIENT";
+const SET_PATIENT_DETAILS = "SET_PATIENT_DETAILS";
+
 export type Action =
   | {
       type: "SET_PATIENT_LIST";
@@ -11,13 +15,34 @@ export type Action =
       payload: Patient;
     }
   | {
-      type: "SET_PATIENT";
+      type: "SET_PATIENT_DETAILS";
       payload: Patient;
     };
 
+export const setPatientList = (payload: Patient[]): Action => {
+  return {
+    type: SET_PATIENT_LIST,
+    payload,
+  };
+};
+
+export const addPatient = (payload: Patient): Action => {
+  return {
+    type: ADD_PATIENT,
+    payload,
+  };
+};
+
+export const setPatientDetails = (payload: Patient): Action => {
+  return {
+    type: SET_PATIENT_DETAILS,
+    payload,
+  };
+};
+
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case "SET_PATIENT_LIST":
+    case SET_PATIENT_LIST:
       return {
         ...state,
         patients: {
@@ -28,7 +53,7 @@ export const reducer = (state: State, action: Action): State => {
           ...state.patients,
         },
       };
-    case "ADD_PATIENT":
+    case ADD_PATIENT:
       return {
         ...state,
         patients: {
@@ -36,7 +61,7 @@ export const reducer = (state: State, action: Action): State => {
           [action.payload.id]: action.payload,
         },
       };
-    case "SET_PATIENT":
+    case SET_PATIENT_DETAILS:
       return {
         ...state,
         patient: action.payload,

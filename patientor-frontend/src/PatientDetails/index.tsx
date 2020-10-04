@@ -1,26 +1,28 @@
 import React, { useEffect } from "react";
 import axios from "axios";
-import { useStateValue } from "../state";
+import { useStateValue, setPatientDetails, addPatient } from "../state";
 import { apiBaseUrl } from "../constants";
 import { Patient } from "../types";
 import { Icon } from "semantic-ui-react";
 
-const PatientDetails: React.FC<{ match: any }> = ({ match }) => {
+const PatientDetails: React.FC<{ match: any }> = ({
+  match: {
+    params: { id: patientId },
+  },
+}) => {
   const [{ patients, patient }, dispatch] = useStateValue();
 
   useEffect(() => {
-    let patientId = match.params.id;
-
     if (patientId in patients) {
-      dispatch({ type: "SET_PATIENT", payload: patients[patientId] });
+      dispatch(setPatientDetails(patients[patientId]));
     } else {
       const fetchPatient = async () => {
         try {
           const { data: receivedPatient } = await axios.get<Patient>(
             `${apiBaseUrl}/patients/${patientId}`
           );
-          dispatch({ type: "SET_PATIENT", payload: receivedPatient });
-          dispatch({ type: "ADD_PATIENT", payload: receivedPatient });
+          dispatch(setPatientDetails(receivedPatient));
+          dispatch(addPatient(receivedPatient));
         } catch (err) {
           console.error(err.message);
         }
