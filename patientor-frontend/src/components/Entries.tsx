@@ -1,7 +1,10 @@
 import React from "react";
+import { useStateValue } from "../state";
 import { Entry } from "../types";
 
 const Entries: React.FC<{ entries: Entry[] }> = ({ entries }) => {
+  const [{ diagnosis }] = useStateValue();
+
   if (!entries) {
     return <></>;
   }
@@ -25,7 +28,13 @@ const Entries: React.FC<{ entries: Entry[] }> = ({ entries }) => {
             {diagnosisCodes && diagnosisCodes?.length > 0 && (
               <ul>
                 {diagnosisCodes.map((code, i) => {
-                  return code && <li key={i}>{code}</li>;
+                  return (
+                    code && (
+                      <li key={i}>
+                        {code}: {diagnosis[code]?.name}
+                      </li>
+                    )
+                  );
                 })}
               </ul>
             )}
