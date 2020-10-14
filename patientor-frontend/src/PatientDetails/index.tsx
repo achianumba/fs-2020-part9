@@ -4,6 +4,7 @@ import { useStateValue, setPatientDetails, addPatient } from "../state";
 import { apiBaseUrl } from "../constants";
 import { Patient } from "../types";
 import { Icon } from "semantic-ui-react";
+import Entries from "../components/Entries";
 
 const PatientDetails: React.FC<{ match: any }> = ({
   match: {
@@ -30,7 +31,7 @@ const PatientDetails: React.FC<{ match: any }> = ({
 
       fetchPatient();
     }
-  }, [dispatch, patient, patients]);
+  }, [dispatch, patient, patients, patientId]);
 
   if (!patient) {
     return <h1>Patient not found!</h1>;
@@ -52,6 +53,8 @@ const PatientDetails: React.FC<{ match: any }> = ({
       </h1>
       {patient.ssn && <p>ssn: {patient.ssn}</p>}
       <p>occupation: {patient.occupation}</p>
+      <h3>entries</h3>
+      <Entries entries={patient.entries} />
     </>
   );
 };
