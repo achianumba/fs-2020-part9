@@ -1,6 +1,12 @@
 import express from "express";
 import { getDiagnoses } from "./services/diagnoses";
-import { getPatients, addPatient, getPatient } from "./services/patients";
+import {
+  getPatients,
+  addPatient,
+  getPatient,
+  addEntry,
+} from "./services/patients";
+import { Entry } from "./interfaces";
 
 const api = express.Router();
 
@@ -29,6 +35,15 @@ api.get("/patients/:id", (req, res) => {
     res.json(getPatient(req.params.id));
   } catch (err) {
     res.status(400).json(err.message);
+  }
+});
+
+api.post("/patients/:id/entries", (req, res) => {
+  try {
+    const newEntry: Entry = addEntry(req.body);
+    res.json(newEntry);
+  } catch (err) {
+    res.status(400).json({ error: err });
   }
 });
 
