@@ -2,7 +2,6 @@ import React from "react";
 import { useStateValue } from "../state";
 import { Entry } from "../types";
 import { Card, Icon } from "semantic-ui-react";
-import { allowedNodeEnvironmentFlags } from "process";
 
 const Entries: React.FC<{ entries: Entry[] }> = ({ entries }) => {
   const [{ diagnosis }] = useStateValue();

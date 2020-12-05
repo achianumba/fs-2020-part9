@@ -1,10 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useStateValue, setPatientDetails, addPatient } from "../state";
 import { apiBaseUrl } from "../constants";
 import { Patient } from "../types";
-import { Icon } from "semantic-ui-react";
+import { Icon, Button } from "semantic-ui-react";
 import Entries from "../components/Entries";
+import { EntryFormValues } from "../AddEntryModal/AddEntryForm";
+import AddEntryModal from "../AddEntryModal";
 
 const PatientDetails: React.FC<{ match: any }> = ({
   match: {
@@ -12,6 +14,16 @@ const PatientDetails: React.FC<{ match: any }> = ({
   },
 }) => {
   const [{ patients, patient }, dispatch] = useStateValue();
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [error, setError] = useState<string | undefined>();
+
+  const submitNewEntry = async (values: EntryFormValues) => {
+    console.log(values);
+  };
+
+  const openModal = (): void => setModalOpen(true);
+
+  const closeModal = (): void => setModalOpen(false);
 
   useEffect(() => {
     if (patientId in patients) {
@@ -25,6 +37,7 @@ const PatientDetails: React.FC<{ match: any }> = ({
           dispatch(setPatientDetails(receivedPatient));
           dispatch(addPatient(receivedPatient));
         } catch (err) {
+          setError(err.message);
           console.error(err.message);
         }
       };
@@ -53,7 +66,19 @@ const PatientDetails: React.FC<{ match: any }> = ({
       </h1>
       {patient.ssn && <p>ssn: {patient.ssn}</p>}
       <p>occupation: {patient.occupation}</p>
-      <h3>entries</h3>
+      <h3 style={{ display: "inline-block", maxWidth: "50%" }}>entries</h3>
+      <Button
+        onClick={openModal}
+        style={{ display: "inline-block", marginLeft: "24px" }}
+      >
+        Add New Entry
+      </Button>
+      <AddEntryModal
+        modalOpen={modalOpen}
+        onSubmit={submitNewEntry}
+        onClose={closeModal}
+        error={error}
+      />
       <Entries entries={patient.entries} />
     </>
   );
