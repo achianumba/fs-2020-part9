@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Grid, Button } from "semantic-ui-react";
-import { Field, Formik, Form, useFormikContext } from "formik";
-import { EntryType, Entry } from "../types";
+import { Field, Formik, Form } from "formik";
+import { EntryType } from "../types";
 import { SelectFieldOption, SelectField } from "./SelectField";
-import { TextField } from "./FormField";
-import { HealthCheckRating } from "../types";
+import { TextField } from "../AddPatientModal/FormField";
+import { HealthCheckRating, NewEntry } from "../types";
+import { DiagnosisSelection } from "../AddPatientModal/FormField";
+import { useStateValue } from "../state";
 
-export type EntryFormValues = Omit<Entry, "id">;
+export type EntryFormValues = Omit<NewEntry, "id">;
 
 interface Props {
   onSubmit: (values: EntryFormValues) => void;
@@ -36,8 +38,16 @@ const healthRating: SelectFieldOption[] = [
 ];
 
 // form validation
-const validate = (values: any) => {
+const validate = (values: EntryFormValues) => {
   const requiredError = "Field is required";
+  const invalidDateError =
+    "Invalid date. Use the YYYY-MM-DD pattern instead. For example 2021-12-06";
+
+  const isInvalidDate = (date: string): boolean => {
+    return new Date(date).toString() === "Invalid Date";
+  };
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+
   const errors: { [field: string]: string } = {};
 
   if (!values.description) {
@@ -48,6 +58,13 @@ const validate = (values: any) => {
     errors.date = requiredError;
   }
 
+  if (
+    (values.date && isInvalidDate(values.date)) ||
+    (values.date && !datePattern.test(values.date))
+  ) {
+    errors.date = invalidDateError;
+  }
+
   if (!values.specialist) {
     errors.specialist = requiredError;
   }
@@ -55,27 +72,44 @@ const validate = (values: any) => {
   if (!values.type) {
     errors.type = requiredError;
   }
-};
 
-// get <select> field value
-const SetEntryType: React.FC<{ setType: (type: string) => void }> = ({
-  setType,
-}) => {
-  const {
-    values: { type },
-  } = useFormikContext();
-  useEffect(() => {
-    setType(type);
-  }, [type, setType]);
-  return null;
+  switch (values.type) {
+    case "Hospital":
+      if (!values.discharge.date) {
+        // required error
+      }
+
+      if (values.discharge.date && isInvalidDate(values.discharge.date)) {
+        // invalid date error
+      }
+
+      if (!values.discharge.criteria) {
+        // required error
+      }
+      return errors;
+
+    case "HealthCheck":
+      if (!values.healthCheckRating) {
+        errors.healthCheckRating = requiredError;
+      }
+      if (values.healthCheckRating && typeof healthRating !== "number") {
+        errors.healthCheckRating = "Please select a valid rating";
+      }
+      return errors;
+
+    case "OccupationalHealthcare":
+      if (!values.employerName) {
+        errors.employerName = requiredError;
+      }
+      return errors;
+
+    default:
+      return errors;
+  }
 };
 
 export const AddEntryForm: React.FC<Props> = ({ onSubmit, onCancel }) => {
-  const [selectedType, setSelectedType] = useState<string>("Hospital");
-
-  const setType = (type: string): void => {
-    setSelectedType(type);
-  };
+  const [{ diagnosis }] = useStateValue();
 
   return (
     <Formik
@@ -85,7 +119,7 @@ export const AddEntryForm: React.FC<Props> = ({ onSubmit, onCancel }) => {
         specialist: "",
         diagnosisCodes: [],
         type: "Hospital",
-        healthCheckRating: "",
+        healthCheckRating: 0,
         discharge: {
           date: "",
           criteria: "",
@@ -100,7 +134,7 @@ export const AddEntryForm: React.FC<Props> = ({ onSubmit, onCancel }) => {
       onCancel={onCancel}
       validate={validate}
     >
-      {({ isValid, dirty }) => {
+      {({ isValid, dirty, setFieldValue, setFieldTouched, values }) => {
         return (
           <Form className="form ui">
             <SelectField
@@ -108,14 +142,12 @@ export const AddEntryForm: React.FC<Props> = ({ onSubmit, onCancel }) => {
               name="type"
               options={entryType}
             />
-            <SetEntryType setType={setType} />
             <Field
               label="Description"
               placeholder="Summarize diagnosis details"
               name="description"
               component={TextField}
             />
-
             <Field
               label="Date"
               placeholder="YYYY-MM-DD"
@@ -129,14 +161,18 @@ export const AddEntryForm: React.FC<Props> = ({ onSubmit, onCancel }) => {
               name="specialist"
               component={TextField}
             />
-            {/* Add diagnosis codes */}
-            {selectedType === "Hospital" && (
+            <DiagnosisSelection
+              setFieldValue={setFieldValue}
+              setFieldTouched={setFieldTouched}
+              diagnoses={Object.values(diagnosis)}
+            />
+            {values.type === "Hospital" && (
               <fieldset>
                 <legend>Discharge</legend>
                 <Field
                   label="Date"
                   name="discharge.date"
-                  placeholder="Discharge date"
+                  placeholder="YYYY-MM-DD"
                   component={TextField}
                 />
                 <Field
@@ -148,7 +184,7 @@ export const AddEntryForm: React.FC<Props> = ({ onSubmit, onCancel }) => {
               </fieldset>
             )}
 
-            {selectedType === "OccupationalHealthcare" && (
+            {values.type === "OccupationalHealthcare" && (
               <>
                 <Field
                   label="Employer"
@@ -166,14 +202,14 @@ export const AddEntryForm: React.FC<Props> = ({ onSubmit, onCancel }) => {
                   />
                   <Field
                     label="End Date"
-                    name="sickLeave.startDate"
+                    name="sickLeave.endDate"
                     placeholder="YYYY-MM-DD"
                     component={TextField}
                   />
                 </fieldset>
               </>
             )}
-            {selectedType === "HealthCheck" && (
+            {values.type === "HealthCheck" && (
               <SelectField
                 label="Health Rating"
                 name="healthCheckRating"

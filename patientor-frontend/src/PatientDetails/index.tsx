@@ -1,8 +1,21 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useStateValue, setPatientDetails, addPatient } from "../state";
+import {
+  useStateValue,
+  setPatientDetails,
+  addPatient,
+  addEntry,
+} from "../state";
 import { apiBaseUrl } from "../constants";
-import { Patient } from "../types";
+import {
+  BaseEntry,
+  HospitalEntry,
+  HealthCheckEntry,
+  OccupationalHealthcareEntry,
+  Entry,
+  Patient,
+  EntryType,
+} from "../types";
 import { Icon, Button } from "semantic-ui-react";
 import Entries from "../components/Entries";
 import { EntryFormValues } from "../AddEntryModal/AddEntryForm";
@@ -17,8 +30,65 @@ const PatientDetails: React.FC<{ match: any }> = ({
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>();
 
-  const submitNewEntry = async (values: EntryFormValues) => {
-    console.log(values);
+  const parseNewEntry = (entry: EntryFormValues): Omit<Entry, "id"> => {
+    const baseEntry: Omit<BaseEntry, "id"> = {
+      description: entry.description,
+      date: entry.date,
+      specialist: entry.specialist,
+      diagnosisCodes: entry.diagnosisCodes,
+    };
+
+    switch (entry.type) {
+      case EntryType.Hospital:
+        const hospitalEntry: Omit<HospitalEntry, "id"> = {
+          ...baseEntry,
+          type: EntryType.Hospital,
+          discharge: {
+            date: entry.discharge.date,
+            criteria: entry.discharge.criteria,
+          },
+        };
+        return hospitalEntry;
+      case EntryType.HealthCheck:
+        const healthCheckEntry: Omit<HealthCheckEntry, "id"> = {
+          ...baseEntry,
+          type: EntryType.HealthCheck,
+          healthCheckRating: entry.healthCheckRating,
+        };
+        return healthCheckEntry;
+      case EntryType.OccupationalHealthcare:
+        const occEntry: Omit<OccupationalHealthcareEntry, "id"> = {
+          ...baseEntry,
+          type: EntryType.OccupationalHealthcare,
+          employerName: entry.employerName,
+          sickLeave: {
+            startDate: entry.sickLeave.startDate,
+            endDate: entry.sickLeave.endDate,
+          },
+        };
+        return occEntry;
+      default:
+        throw new Error(`Invalid entry: ${JSON.stringify(entry, null, 2)}`);
+    }
+  };
+
+  const submitNewEntry = async (entry: EntryFormValues) => {
+    try {
+      type NewEntry = Omit<Entry, "id"> & { userId: string };
+      const newEntry: NewEntry = {
+        userId: patientId,
+        ...parseNewEntry(entry),
+      };
+
+      const { data: savedEntry } = await axios.post<Entry>(
+        `${apiBaseUrl}/patients/${patientId}/entries`,
+        newEntry
+      );
+      dispatch(addEntry(savedEntry, patientId));
+      closeModal();
+    } catch (err) {
+      console.error(err.response.data);
+    }
   };
 
   const openModal = (): void => setModalOpen(true);

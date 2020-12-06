@@ -78,7 +78,7 @@ export const addPatient = ({
 };
 
 export const addEntry = (entry: any): Entry => {
-  const patient = patients.find((p) => p.id === entry.patientId);
+  const patient = patients.find((p) => p.id === entry.userId);
   const patientId = patient?.id;
 
   if (!patientId) {
